@@ -5,6 +5,9 @@
 ##########################                      
 ####  Load libraries  ####
 ##########################
+# install
+install.packages("rgdal")
+
 
 # Importing sf
 library(sf)
@@ -18,6 +21,8 @@ library(readxl)
 library(janitor)
 # Install ggpubr
 library(ggpubr)
+# rdgal
+library(rgdal)
 
 
 
@@ -220,13 +225,13 @@ poverty.sp <- merge(counties.fips,
 poverty.sp = poverty.sp %>% filter(!is.na(poverty.sp$Percent_Below_Poverty))
 
 # merge poverty with aqi and income
-INC_AQI = merge(INC_AQI,
+INC_AQI.sp = merge(INC_AQI,
                 poverty,
                 by.x = "FIPS",
                 by.y = "FIPS")
 
 # merge income data with mortality and aqi
-INCmortAQI = merge(INC_AQI,
+INCmortAQI.sp = merge(INC_AQI,
                    mort21,
                    by.x = "FIPS",
                    by.y = "FIPS")
@@ -236,6 +241,17 @@ INCmortAQI = merge(INC_AQI,
 
 
 
+
+
+
+
+
+##############################################
+# merge aqi mortality without spatial data #
+##############################################
+
+INCmortAQI = data.frame(INCmortAQI.sp)
+INCmortAQI <- INCmortAQI[, -which(names(INCmortAQI) == "geometry")]
 
 
 ############################# 
