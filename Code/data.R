@@ -40,15 +40,12 @@ states.fips <- st_read("Data/USstates/US_states.shp")
 counties.fips <- st_read("Data/UScounties/UScounties.shp")
 
 # remove leading 0's from FIPS
-FIPS_new <- str_replace(counties.fips$FIPS, "^0+", "")
-countFips = counties.fips
-# Replace FIPS with FIPS_new
-countFips$FIPS <- FIPS_new
+counties.fips$FIPS <- str_replace(counties.fips$FIPS, "^0+", "")
 
 #create new df to help clean data
-subregion = c(countFips$NAME)
-region = c(countFips$STATE_NAME)
-FIPS = c(countFips$FIPS)
+subregion = c(counties.fips$NAME)
+region = c(counties.fips$STATE_NAME)
+FIPS = c(counties.fips$FIPS)
 countyhelper = data.frame(subregion, region, FIPS)
 
 #export df
@@ -108,9 +105,9 @@ AQI.sp <- merge(aqi_annual_county,
                 by.x = c("County", "State"),
                 by.y = c("NAME", "STATE_NAME"),
                 all.x = TRUE)
-# remove NAs
-AQI.sp = AQI.sp %>% filter(!is.na(AQI.sp$Year))
 
+# filtering out non-spatial data
+AQI.sp = AQI.sp %>% filter(!is.na(AQI.sp$FIPS))
 
 
 
@@ -132,16 +129,21 @@ mort21 = read.delim("Data/respiratoryData/Death2021.txt", header = TRUE, sep = "
 mort21 = subset(mort21, select = -c(Notes))
 # renaming fips
 colnames(mort21)[2] = "FIPS"
-
+dim(mort21)
+dim(AQI.sp)
 # Merge AQI and mortality rates due to respiratory disease
-
 mortAQI.sp = merge(AQI.sp,
                    mort21,
                    by.x = "FIPS",
                    by.y = "FIPS",
                    all.x = TRUE)
 
+dim(mortAQI.sp)
+# filter out NA values
 mortAQI.sp = mortAQI.sp %>% filter(!is.na(mortAQI.sp$Deaths))
+
+# getting rid of leading zeros in FIPS for counties.fips data
+counties.fips$FIPS
 
 # Join/merge spatial and table data
 mort21.sp <- merge(counties.fips, 
@@ -241,5 +243,8 @@ write_csv(medincome,"Data/output/medincome.csv", append = FALSE)
 
 # median income spatial 
 st_write(medinc.sp, "Data/output/medincomeSP.shp", append = FALSE)
+
+#write out mortAQI.sp (merged data with spatial data)
+st_write(mortAQI.sp, "Data/output/mortality_AQI_MERGED.shp", append = FALSE)
 
 
