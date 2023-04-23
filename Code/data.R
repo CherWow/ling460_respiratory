@@ -6,7 +6,6 @@
 ####  Load libraries  ####
 ##########################
 # install
-install.packages("rgdal")
 
 
 # Importing sf
@@ -21,8 +20,7 @@ library(readxl)
 library(janitor)
 # Install ggpubr
 library(ggpubr)
-# rdgal
-library(rgdal)
+
 
 
 
@@ -288,7 +286,10 @@ st_write(medinc.sp, "Data/output/medincomeSP.shp", append = FALSE)
 st_write(mortAQI.sp, "Data/output/mortality_AQI_MERGED.shp", append = FALSE)
 
 #write out income aqi
-st_write(INC_AQI, "Data/output/income_aqi.shp", append = FALSE)
+st_write(INC_AQI.sp, "Data/output/income_aqi.shp", append = FALSE)
 
 #write out income mortality and aqi
-st_write(INCmortAQI, "Data/output/income_mortality_aqi.shp", append = FALSE)
+st_write(INCmortAQI.sp, "Data/output/income_mortality_aqi.shp", append = FALSE)
+
+#write out income mortality and aqi as CSV
+write_csv(INCmortAQI, "Data/output/income_mortality_aqi.csv", append = FALSE)
