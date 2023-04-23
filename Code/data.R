@@ -42,11 +42,12 @@ counties.fips <- st_read("Data/UScounties/UScounties.shp")
 # remove leading 0's from FIPS
 counties.fips$FIPS <- str_replace(counties.fips$FIPS, "^0+", "")
 
+#rename header county spatial data
+names(counties.fips)[names(counties.fips) == "NAME"] <- "subregion"
+names(counties.fips)[names(counties.fips) == "STATE_NAME"] <- "region"
+
 #create new df to help clean data
-subregion = c(counties.fips$NAME)
-region = c(counties.fips$STATE_NAME)
-FIPS = c(counties.fips$FIPS)
-countyhelper = data.frame(subregion, region, FIPS)
+countyhelper = subset(counties.fips, select = c("subregion", "region","FIPS"))
 
 #export df
 write_csv(countyhelper, "Data/output/countyHelp.csv")
@@ -99,11 +100,15 @@ cig_use.sp %>% filter(!is.na(cig_use.sp$Data_Value))
 # Read in annual AQI (2020) by county
 aqi_annual_county <- read.csv("Data/pollutionData/annual_aqi_by_county_2020.csv")
 
+# rename headers
+names(aqi_annual_county)[names(aqi_annual_county) == "County"] <- "subregion"
+names(aqi_annual_county)[names(aqi_annual_county) == "State"] <- "region"
+
 # Join/merge spatial and table data
 AQI.sp <- merge(aqi_annual_county,
                 counties.fips, 
-                by.x = c("County", "State"),
-                by.y = c("NAME", "STATE_NAME"),
+                by.x = c("subregion", "region"),
+                by.y = c("subregion", "region"),
                 all.x = TRUE)
 
 # filtering out non-spatial data
@@ -129,8 +134,11 @@ mort21 = read.delim("Data/respiratoryData/Death2021.txt", header = TRUE, sep = "
 mort21 = subset(mort21, select = -c(Notes))
 # renaming fips
 colnames(mort21)[2] = "FIPS"
-dim(mort21)
-dim(AQI.sp)
+
+# filter out NA values
+mort21 = mort21 %>% filter(!is.na(mort21$FIPS))
+
+
 # Merge AQI and mortality rates due to respiratory disease
 mortAQI.sp = merge(AQI.sp,
                    mort21,
@@ -138,12 +146,8 @@ mortAQI.sp = merge(AQI.sp,
                    by.y = "FIPS",
                    all.x = TRUE)
 
-dim(mortAQI.sp)
 # filter out NA values
 mortAQI.sp = mortAQI.sp %>% filter(!is.na(mortAQI.sp$Deaths))
-
-# getting rid of leading zeros in FIPS for counties.fips data
-counties.fips$FIPS
 
 # Join/merge spatial and table data
 mort21.sp <- merge(counties.fips, 
@@ -153,7 +157,6 @@ mort21.sp <- merge(counties.fips,
                    all.x = TRUE)
 # remove NAs
 mort21.sp = mort21.sp %>% filter(!is.na(mort21.sp$Deaths))
-
 
 
 
@@ -184,7 +187,16 @@ medinc.sp <- merge(counties.fips,
                    by.x = "FIPS",
                    by.y = "FIPS",
                    all.x = TRUE)
-medinc.sp %>% filter(!is.na(medinc.sp$Value..Dollars))
+
+# filter out NAs
+medinc.sp = medinc.sp %>% filter(!is.na(medinc.sp$Value..Dollars))
+
+# merge income data with aqi
+INC_AQI = merge(AQI.sp,
+                   medincome,
+                   by.x = "FIPS",
+                   by.y = "FIPS")
+
 
 #######################
 # POVERTY COUNTY DATA #
@@ -196,16 +208,28 @@ poverty <- read_excel("Data/IncomeData/poverty_county.xlsx")
 # Changing column name for third column to something more simple
 colnames(poverty)[3] <- "Percent_Below_Poverty"
 
+#rename column to FIPS
+names(poverty)[names(poverty) == "countyFIPS"] = "FIPS"
+
 # Join/merge spatial and table data
 poverty.sp <- merge(counties.fips, 
                     poverty, 
                     by.x = "FIPS",
-                    by.y = "countyFIPS",
+                    by.y = "FIPS",
                     all.x = TRUE)
-poverty.sp %>% filter(!is.na(poverty.sp$Percent_Below_Poverty))
+poverty.sp = poverty.sp %>% filter(!is.na(poverty.sp$Percent_Below_Poverty))
 
+# merge poverty with aqi and income
+INC_AQI = merge(INC_AQI,
+                poverty,
+                by.x = "FIPS",
+                by.y = "FIPS")
 
-
+# merge income data with mortality and aqi
+INCmortAQI = merge(INC_AQI,
+                   mort21,
+                   by.x = "FIPS",
+                   by.y = "FIPS")
 
 
 
@@ -247,4 +271,8 @@ st_write(medinc.sp, "Data/output/medincomeSP.shp", append = FALSE)
 #write out mortAQI.sp (merged data with spatial data)
 st_write(mortAQI.sp, "Data/output/mortality_AQI_MERGED.shp", append = FALSE)
 
+#write out income aqi
+st_write(INC_AQI, "Data/output/income_aqi.shp", append = FALSE)
 
+#write out income mortality and aqi
+st_write(INCmortAQI, "Data/output/income_mortality_aqi.shp", append = FALSE)

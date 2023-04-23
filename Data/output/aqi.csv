@@ -1,4 +1,4 @@
-State,County,Year,Days.with.AQI,Good.Days,Moderate.Days,Unhealthy.for.Sensitive.Groups.Days,Unhealthy.Days,Very.Unhealthy.Days,Hazardous.Days,Max.AQI,X90th.Percentile.AQI,Median.AQI,Days.CO,Days.NO2,Days.Ozone,Days.PM2.5,Days.PM10
+region,subregion,Year,Days.with.AQI,Good.Days,Moderate.Days,Unhealthy.for.Sensitive.Groups.Days,Unhealthy.Days,Very.Unhealthy.Days,Hazardous.Days,Max.AQI,X90th.Percentile.AQI,Median.AQI,Days.CO,Days.NO2,Days.Ozone,Days.PM2.5,Days.PM10
 Alabama,Baldwin,2020,269,250,19,0,0,0,0,74,49,36,0,0,198,71,0
 Alabama,Clay,2020,108,99,9,0,0,0,0,86,49,26,0,0,0,108,0
 Alabama,DeKalb,2020,364,350,14,0,0,0,0,90,45,36,0,0,331,33,0
