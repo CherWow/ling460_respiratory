@@ -31,7 +31,6 @@ library(maps)
 library(mapproj)
 library(sp)
 mortSP = st_read("Data/output/mortality2021SP.shp")
-csvMort = read_csv("Data/output/mortality2021.csv")
 
 #get helper
 countyHelp = read.csv("Data/output/countyHelp.csv")
