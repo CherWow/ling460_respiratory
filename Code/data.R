@@ -103,13 +103,13 @@ cig_use.sp %>% filter(!is.na(cig_use.sp$Data_Value))
 aqi_annual_county <- read.csv("Data/pollutionData/annual_aqi_by_county_2020.csv")
 
 # Join/merge spatial and table data
-AQI.sp <- merge(counties.fips, 
-                aqi_annual_county,
-                by.x = "NAME",
-                by.y = "County",
+AQI.sp <- merge(aqi_annual_county,
+                counties.fips, 
+                by.x = c("County", "State"),
+                by.y = c("NAME", "STATE_NAME"),
                 all.x = TRUE)
 # remove NAs
-AQI.sp = AQI.sp %>% filter(!is.na(AQI.sp$State))
+AQI.sp = AQI.sp %>% filter(!is.na(AQI.sp$Year))
 
 
 
@@ -133,6 +133,15 @@ mort21 = subset(mort21, select = -c(Notes))
 # renaming fips
 colnames(mort21)[2] = "FIPS"
 
+# Merge AQI and mortality rates due to respiratory disease
+
+mortAQI.sp = merge(AQI.sp,
+                   mort21,
+                   by.x = "FIPS",
+                   by.y = "FIPS",
+                   all.x = TRUE)
+
+mortAQI.sp = mortAQI.sp %>% filter(!is.na(mortAQI.sp$Deaths))
 
 # Join/merge spatial and table data
 mort21.sp <- merge(counties.fips, 
