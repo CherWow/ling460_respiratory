@@ -141,6 +141,8 @@ colnames(mort21)[2] = "FIPS"
 # filter out NA values
 mort21 = mort21 %>% filter(!is.na(mort21$FIPS))
 
+#percent deaths per 100,000 people
+mort21$rate_100k = paste0(round(mort21$Deaths/(mort21$Population)*100000, 2))
 
 # Merge AQI and mortality rates due to respiratory disease
 mortAQI.sp = merge(AQI.sp,
@@ -293,3 +295,4 @@ st_write(INCmortAQI.sp, "Data/output/income_mortality_aqi.shp", append = FALSE)
 
 #write out income mortality and aqi as CSV
 write_csv(INCmortAQI, "Data/output/income_mortality_aqi.csv", append = FALSE)
+
